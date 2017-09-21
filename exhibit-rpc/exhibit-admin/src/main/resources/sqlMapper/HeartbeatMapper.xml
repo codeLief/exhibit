@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exhibit.rpc.dao.HeartbeatDAO">
+    <resultMap id="BaseResultMap" type="com.exhibit.rpc.model.Heartbeat">
+            <id column="id" property="id" jdbcType="VARCHAR"/>
+            <result column="heartbeat_url" property="heartbeatUrl" jdbcType="VARCHAR"/>
+            <result column="env" property="env" jdbcType="BIGINT"/>
+            <result column="heartbeat_time" property="heartbeatTime" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+    id,heartbeat_url,heartbeat_time,env
+    </sql>
+
+    <sql id="order_by_sql">
+        <if test="orderColumn != null and orderSort != null">
+            ORDER BY ${orderColumn} ${orderSort}
+        </if>
+
+        <if test="orderColumn == null or orderSort == null">
+            ORDER BY id DESC
+        </if>
+    </sql>
+
+    <sql id="base_where_condition">
+        <where>
+                <if test="id != null and id != '' ">
+                    AND id = #{id}
+                </if>
+                <if test="heartbeatUrl != null and heartbeatUrl != '' ">
+                    AND heartbeat_url = #{heartbeatUrl}
+                </if>
+                <if test="heartbeatTime != null">
+                    AND heartbeat_time = #{heartbeatTime}
+                </if>
+                <if test="env != null">
+                    AND env = #{env}
+                </if>
+            <if test="ids != null">
+                <foreach collection="ids" index="index" item="id" open=" AND id IN (" separator="," close=")">
+                #{id,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="magicList != null">
+                <![CDATA[ AND  ${magicColumn}  in ]]>
+                <foreach collection="magicList" index="index" item="magicValue" open=" (" separator="," close=")">
+                #{magicValue}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+
+    <insert id="insert" keyProperty="id"
+            parameterType="com.exhibit.rpc.model.Heartbeat">
+        <selectKey resultType="java.lang.String" order="BEFORE" keyProperty="id">
+            SELECT replace(uuid(),'-','') AS id
+        </selectKey>
+        INSERT INTO `heartbeat` (id, heartbeat_url,heartbeat_time, env)
+        VALUES (#{id,jdbcType=VARCHAR},
+                #{heartbeatUrl},
+                #{heartbeatTime},
+                #{env}
+    )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO `heartbeat` (id, heartbeat_url,heartbeat_time, env)
+        VALUES
+        <if test="list != null">
+            <foreach collection="list" item="item" index="index" separator=",">
+                (
+                    replace(uuid(), '-', ''),
+                    #{item.heartbeatUrl},
+                    #{item.heartbeatTime},
+                    #{item.env}
+                )
+            </foreach>
+        </if>
+    </insert>
+
+    <insert id="insertSelective" keyProperty="id"
+            parameterType="com.exhibit.rpc.model.Heartbeat">
+        <selectKey resultType="java.lang.String" order="BEFORE" keyProperty="id">
+            SELECT replace(uuid(),'-','') AS id
+        </selectKey>
+
+        INSERT INTO `heartbeat`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="heartbeatUrl != null">
+            heartbeat_url,
+            </if>
+            <if test="heartbeatTime != null">
+            heartbeat_time,
+            </if>
+            <if test="env != null">
+            env
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+        #{id,jdbcType=VARCHAR},
+            <if test="heartbeatUrl != null">
+            #{heartbeatUrl},
+            </if>
+            <if test="heartbeatTime != null">
+            #{heartbeatTime},
+            </if>
+            <if test="env != null">
+            #{env}
+            </if>
+        </trim>
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `heartbeat`
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectBatchByPrimaryKey" resultMap="BaseResultMap" parameterType="java.util.List">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `heartbeat`
+        <include refid="base_where_condition"/>
+    </select>
+
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.exhibit.rpc.model.Heartbeat">
+        UPDATE `heartbeat`
+        <set>
+            <if test="heartbeatUrl != null">
+            heartbeat_url = #{heartbeatUrl},
+            </if>
+            <if test="heartbeatTime != null">
+            heartbeat_time = #{heartbeatTime},
+            </if>
+            <if test="env != null">
+            env = #{env}
+            </if>
+        </set>
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="com.exhibit.rpc.model.Heartbeat">
+        UPDATE `heartbeat`
+        SET
+        heartbeat_url = #{heartbeatUrl},
+        heartbeat_time = #{heartbeatTime},
+        env = #{env}
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectByParams" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `heartbeat`
+        <include refid="base_where_condition"/>
+        <include refid="order_by_sql"/>
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="countByParams" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+        SELECT
+        COUNT(DISTINCT id)
+        FROM `heartbeat`
+        <include refid="base_where_condition"/>
+    </select>
+
+    <select id="selectFirstByParams" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `heartbeat`
+        <include refid="base_where_condition"/>
+        <include refid="order_by_sql"/>
+        LIMIT 1
+    </select>
+
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		DELETE FROM `heartbeat`
+		WHERE id = #{id,jdbcType=VARCHAR}
+	</delete>
+</mapper>

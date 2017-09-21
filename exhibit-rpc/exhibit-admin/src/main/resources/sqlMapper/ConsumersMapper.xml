@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exhibit.rpc.dao.ConsumersDAO">
+    <resultMap id="BaseResultMap" type="com.exhibit.rpc.model.Consumers">
+            <id column="id" property="id" jdbcType="VARCHAR"/>
+            <result column="provider_id" property="providerId" jdbcType="VARCHAR"/>
+            <result column="s_url" property="sUrl" jdbcType="VARCHAR"/>
+            <result column="s_env" property="sEnv" jdbcType="BIGINT"/>
+            <result column="s_interface" property="sInterface" jdbcType="VARCHAR"/>
+            <result column="c_ip" property="cIp" jdbcType="VARCHAR"/>
+            <result column="c_app_name" property="cAppName" jdbcType="VARCHAR"/>
+            <result column="status" property="status" jdbcType="INTEGER"/>
+            <result column="author" property="author" jdbcType="VARCHAR"/>
+            <result column="heartbeat_id" property="heartbeatId" jdbcType="VARCHAR"/>
+            <result column="create_at" property="createAt" jdbcType="BIGINT"/>
+            <result column="destroy_time" property="destroyTime" jdbcType="BIGINT"/>
+            <result column="update_at" property="updateAt" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+    id,provider_id,s_url,s_env,s_interface,c_ip,c_app_name,status,author,heartbeat_id,create_at,destroy_time,update_at
+    </sql>
+
+    <sql id="order_by_sql">
+        <if test="orderColumn != null and orderSort != null">
+            ORDER BY ${orderColumn} ${orderSort}
+        </if>
+
+        <if test="orderColumn == null or orderSort == null">
+            ORDER BY id DESC
+        </if>
+    </sql>
+
+    <sql id="base_where_condition">
+        <where>
+                <if test="id != null and id != '' ">
+                    AND id = #{id}
+                </if>
+                <if test="providerId != null and providerId != '' ">
+                    AND provider_id = #{providerId}
+                </if>
+                <if test="sUrl != null and sUrl != '' ">
+                    AND s_url = #{sUrl}
+                </if>
+                <if test="sEnv != null">
+                    AND s_env = #{sEnv}
+                </if>
+                <if test="sInterface != null and sInterface != '' ">
+                    AND s_interface = #{sInterface}
+                </if>
+                <if test="cIp != null and cIp != '' ">
+                    AND c_ip = #{cIp}
+                </if>
+                <if test="selectType != null and selectType != '' and selectLike != null and selectLike != ''">
+                		<if test="selectType == 1">
+                		 	AND s_interface like CONCAT('%', #{selectLike} , '%') 
+                		</if>
+                		<if test="selectType == 2">
+                			AND c_app_name like CONCAT('%', #{selectLike} , '%') 
+                		</if>
+                		<if test="selectType == 3">
+                			AND s_url like CONCAT('%', #{selectLike} , '%') 
+                		</if>
+                </if>
+                
+                <if test="cAppName != null and cAppName != '' ">
+                    AND c_app_name = #{cAppName}
+                </if>
+                <if test="status != null">
+                    AND status = #{status}
+                </if>
+                <if test="author != null and author != '' ">
+                    AND author = #{author}
+                </if>
+                <if test="heartbeatId != null and heartbeatId != '' ">
+                    AND heartbeat_id = #{heartbeatId}
+                </if>
+                <if test="createAt != null">
+                    AND create_at = #{createAt}
+                </if>
+                <if test="destroyTime != null">
+                    AND destroy_time = #{destroyTime}
+                </if>
+                <if test="updateAt != null">
+                    AND update_at = #{updateAt}
+                </if>
+            <if test="ids != null">
+                <foreach collection="ids" index="index" item="id" open=" AND id IN (" separator="," close=")">
+                #{id,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="magicList != null">
+                <![CDATA[ AND  ${magicColumn}  in ]]>
+                <foreach collection="magicList" index="index" item="magicValue" open=" (" separator="," close=")">
+                #{magicValue}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+
+    <insert id="insert" keyProperty="id"
+            parameterType="com.exhibit.rpc.model.Consumers">
+        <selectKey resultType="java.lang.String" order="BEFORE" keyProperty="id">
+            SELECT replace(uuid(),'-','') AS id
+        </selectKey>
+        INSERT INTO `consumers` (id, provider_id,s_url,s_env,s_interface,c_ip,c_app_name,status,author,heartbeat_id,create_at,destroy_time,update_at)
+        VALUES (#{id,jdbcType=VARCHAR},
+                #{providerId},
+                #{sUrl},
+                #{sEnv},
+                #{sInterface},
+                #{cIp},
+                #{cAppName},
+                #{status},
+                #{author},
+                #{heartbeatId},
+                #{createAt},
+                #{destroyTime},
+                #{updateAt}
+    )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO `consumers` (id, provider_id,s_url,s_env,s_interface,c_ip,c_app_name,status,author,heartbeat_id,create_at,destroy_time,update_at)
+        VALUES
+        <if test="list != null">
+            <foreach collection="list" item="item" index="index" separator=",">
+                (
+                    replace(uuid(), '-', ''),
+                    #{item.providerId},
+                    #{item.sUrl},
+                    #{item.sEnv},
+                    #{item.sInterface},
+                    #{item.cIp},
+                    #{item.cAppName},
+                    #{item.status},
+                    #{item.author},
+                    #{item.heartbeatId},
+                    #{item.createAt},
+                    #{item.destroyTime},
+                    #{item.updateAt}
+                )
+            </foreach>
+        </if>
+    </insert>
+
+    <insert id="insertSelective" keyProperty="id"
+            parameterType="com.exhibit.rpc.model.Consumers">
+        <selectKey resultType="java.lang.String" order="BEFORE" keyProperty="id">
+            SELECT replace(uuid(),'-','') AS id
+        </selectKey>
+
+        INSERT INTO `consumers`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="providerId != null">
+            provider_id,
+            </if>
+            <if test="sUrl != null">
+            s_url,
+            </if>
+            <if test="sEnv != null">
+            s_env,
+            </if>
+            <if test="sInterface != null">
+            s_interface,
+            </if>
+            <if test="cIp != null">
+            c_ip,
+            </if>
+            <if test="cAppName != null">
+            c_app_name,
+            </if>
+            <if test="status != null">
+            status,
+            </if>
+            <if test="author != null">
+            author,
+            </if>
+            <if test="heartbeatId != null">
+            heartbeat_id,
+            </if>
+            <if test="createAt != null">
+            create_at,
+            </if>
+            <if test="destroyTime != null">
+            destroy_time,
+            </if>
+            <if test="updateAt != null">
+            update_at
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+        #{id,jdbcType=VARCHAR},
+            <if test="providerId != null">
+            #{providerId},
+            </if>
+            <if test="sUrl != null">
+            #{sUrl},
+            </if>
+            <if test="sEnv != null">
+            #{sEnv},
+            </if>
+            <if test="sInterface != null">
+            #{sInterface},
+            </if>
+            <if test="cIp != null">
+            #{cIp},
+            </if>
+            <if test="cAppName != null">
+            #{cAppName},
+            </if>
+            <if test="status != null">
+            #{status},
+            </if>
+            <if test="author != null">
+            #{author},
+            </if>
+            <if test="heartbeatId != null">
+            #{heartbeatId},
+            </if>
+            <if test="createAt != null">
+            #{createAt},
+            </if>
+            <if test="destroyTime != null">
+            #{destroyTime},
+            </if>
+            <if test="updateAt != null">
+            #{updateAt}
+            </if>
+        </trim>
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `consumers`
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectBatchByPrimaryKey" resultMap="BaseResultMap" parameterType="java.util.List">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `consumers`
+        <include refid="base_where_condition"/>
+    </select>
+
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.exhibit.rpc.model.Consumers">
+        UPDATE `consumers`
+        <set>
+            <if test="providerId != null">
+            provider_id = #{providerId},
+            </if>
+            <if test="sUrl != null">
+            s_url = #{sUrl},
+            </if>
+            <if test="sEnv != null">
+            s_env = #{sEnv},
+            </if>
+            <if test="sInterface != null">
+            s_interface = #{sInterface},
+            </if>
+            <if test="cIp != null">
+            c_ip = #{cIp},
+            </if>
+            <if test="cAppName != null">
+            c_app_name = #{cAppName},
+            </if>
+            <if test="status != null">
+            status = #{status},
+            </if>
+            <if test="author != null">
+            author = #{author},
+            </if>
+            <if test="heartbeatId != null">
+            heartbeat_id = #{heartbeatId},
+            </if>
+            <if test="createAt != null">
+            create_at = #{createAt},
+            </if>
+            <if test="destroyTime != null">
+            destroy_time = #{destroyTime},
+            </if>
+            <if test="updateAt != null">
+            update_at = #{updateAt}
+            </if>
+        </set>
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="com.exhibit.rpc.model.Consumers">
+        UPDATE `consumers`
+        SET
+        provider_id = #{providerId},
+        s_url = #{sUrl},
+        s_env = #{sEnv},
+        s_interface = #{sInterface},
+        c_ip = #{cIp},
+        c_app_name = #{cAppName},
+        status = #{status},
+        author = #{author},
+        heartbeat_id = #{heartbeatId},
+        create_at = #{createAt},
+        destroy_time = #{destroyTime},
+        update_at = #{updateAt}
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectByParams" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `consumers`
+        <include refid="base_where_condition"/>
+        <include refid="order_by_sql"/>
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="countByParams" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+        SELECT
+        COUNT(DISTINCT id)
+        FROM `consumers`
+        <include refid="base_where_condition"/>
+    </select>
+
+    <select id="selectFirstByParams" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `consumers`
+        <include refid="base_where_condition"/>
+        <include refid="order_by_sql"/>
+        LIMIT 1
+    </select>
+    
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		DELETE FROM `consumers`
+		WHERE id = #{id,jdbcType=VARCHAR}
+	</delete>
+</mapper>
