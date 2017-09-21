@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exhibit.rpc.dao.EnvDAO">
+    <resultMap id="BaseResultMap" type="com.exhibit.rpc.model.Env">
+            <result column="env_id" property="envId" jdbcType="BIGINT"/>
+            <result column="name" property="name" jdbcType="VARCHAR"/>
+            <result column="host" property="host" jdbcType="VARCHAR"/>
+            <result column="port" property="port" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+    env_id,name,host,port
+    </sql>
+
+    <sql id="order_by_sql">
+        <if test="orderColumn != null and orderSort != null">
+            ORDER BY ${orderColumn} ${orderSort}
+        </if>
+
+        <if test="orderColumn == null or orderSort == null">
+            ORDER BY env_id DESC
+        </if>
+    </sql>
+
+    <sql id="base_where_condition">
+        <where>
+                <if test="envId != null">
+                    AND env_id = #{envId}
+                </if>
+                <if test="name != null and name != '' ">
+                    AND name = #{name}
+                </if>
+                <if test="host != null and host != '' ">
+                    AND host = #{host}
+                </if>
+                <if test="port != null">
+                    AND port = #{port}
+                </if>
+            <if test="ids != null">
+                <foreach collection="ids" index="index" item="id" open=" AND id IN (" separator="," close=")">
+                #{id,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="magicList != null">
+                <![CDATA[ AND  ${magicColumn}  in ]]>
+                <foreach collection="magicList" index="index" item="magicValue" open=" (" separator="," close=")">
+                #{magicValue}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+
+    <insert id="insert" keyProperty="id"
+            parameterType="com.exhibit.rpc.model.Env">
+        <selectKey resultType="java.lang.String" order="BEFORE" keyProperty="id">
+            SELECT replace(uuid(),'-','') AS id
+        </selectKey>
+        INSERT INTO `env` (id, env_id,name,host,port)
+        VALUES (#{id,jdbcType=VARCHAR},
+            #{envId},
+                #{name},
+                #{host},
+                #{port}
+    )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO `env` (id, env_id,name,host,port)
+        VALUES
+        <if test="list != null">
+            <foreach collection="list" item="item" index="index" separator=",">
+                (
+                    #{item.envId},
+                    #{item.name},
+                    #{item.host},
+                    #{item.port}
+                )
+            </foreach>
+        </if>
+    </insert>
+
+    <insert id="insertSelective" keyProperty="id"
+            parameterType="com.exhibit.rpc.model.Env">
+        <selectKey resultType="java.lang.String" order="BEFORE" keyProperty="id">
+            SELECT replace(uuid(),'-','') AS id
+        </selectKey>
+
+        INSERT INTO `env`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="envId != null">
+            env_id,
+            </if>
+            <if test="name != null">
+            name,
+            </if>
+            <if test="host != null">
+            host,
+            </if>
+            <if test="port != null">
+            port
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+        #{id,jdbcType=VARCHAR},
+            <if test="envId != null">
+            #{envId},
+            </if>
+            <if test="name != null">
+            #{name},
+            </if>
+            <if test="host != null">
+            #{host},
+            </if>
+            <if test="port != null">
+            #{port}
+            </if>
+        </trim>
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `env`
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectBatchByPrimaryKey" resultMap="BaseResultMap" parameterType="java.util.List">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `env`
+        <include refid="base_where_condition"/>
+    </select>
+
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.exhibit.rpc.model.Env">
+        UPDATE `env`
+        <set>
+            <if test="envId != null">
+            env_id = #{envId},
+            </if>
+            <if test="name != null">
+            name = #{name},
+            </if>
+            <if test="host != null">
+            host = #{host},
+            </if>
+            <if test="port != null">
+            port = #{port}
+            </if>
+        </set>
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="com.exhibit.rpc.model.Env">
+        UPDATE `env`
+        SET
+        env_id = #{envId},
+        name = #{name},
+        host = #{host},
+        port = #{port}
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectByParams" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `env`
+        <include refid="base_where_condition"/>
+        <include refid="order_by_sql"/>
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="countByParams" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+        SELECT
+        COUNT(DISTINCT id)
+        FROM `env`
+        <include refid="base_where_condition"/>
+    </select>
+
+    <select id="selectFirstByParams" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `env`
+        <include refid="base_where_condition"/>
+        <include refid="order_by_sql"/>
+        LIMIT 1
+    </select>
+
+</mapper>

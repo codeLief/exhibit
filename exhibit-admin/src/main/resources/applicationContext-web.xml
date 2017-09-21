@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+    	http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop
+    	http://www.springframework.org/schema/aop/spring-aop.xsd
+    	http://www.springframework.org/schema/mvc
+    	http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    	
+    	
+     <context:component-scan base-package="com.exhibit"/>	
+    	
+        <!-- 开启注解 -->
+    <mvc:annotation-driven/>
+
+    <!-- 启用AspectJ对Annotation的支持 -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>	
+    	
+    <!--  静态资源访问    -->
+    <mvc:resources mapping="/page/**" location="/page/"/>
+    	
+	 <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/"/>
+        <property name="suffix" value=".jsp" />
+    </bean>
+
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
+            </list>
+        </property>
+    </bean>
+	
+    <!-- 配置多请求数据类型，如json xml-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- set the max upload size10MB -->
+        <property name="defaultEncoding" value="UTF-8" />
+        <property name="maxUploadSize" value="10485760" />
+        <property name="maxInMemorySize" value="10240" />
+    </bean>
+    
+        <bean id="mapper" class="org.dozer.spring.DozerBeanMapperFactoryBean">
+        <property name="mappingFiles">
+            <list>
+                <value>classpath*:dozer/*.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="dozerUtil" class="com.exhibit.rpc.util.DozerUtil">
+        <property name="mapper" ref="mapper"/>
+    </bean>
+    
+        <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="com.exhibit.rpc.base.TransforRequestBodyInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>

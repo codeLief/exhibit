@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exhibit.rpc.dao.ProviderDetailDAO">
+    <resultMap id="BaseResultMap" type="com.exhibit.rpc.model.ProviderDetail">
+            <id column="id" property="id" jdbcType="VARCHAR"/>
+            <result column="provider_id" property="providerId" jdbcType="VARCHAR"/>
+            <result column="s_ip" property="sIp" jdbcType="VARCHAR"/>
+            <result column="s_port" property="sPort" jdbcType="INTEGER"/>
+            <result column="s_read_timeout" property="sReadTimeout" jdbcType="VARCHAR"/>
+            <result column="s_desc" property="sDesc" jdbcType="VARCHAR"/>
+            <result column="s_jvmId" property="sJvmId" jdbcType="INTEGER"/>
+            <result column="last_check_time" property="lastCheckTime" jdbcType="BIGINT"/>
+            <result column="destroy_time" property="destroyTime" jdbcType="BIGINT"/>
+            <result column="heartbeat_id" property="heartbeatId" jdbcType="VARCHAR"/>
+            <result column="create_at" property="createAt" jdbcType="BIGINT"/>
+            <result column="status" property="status" jdbcType="INTEGER"/>
+            <result column="update_at" property="updateAt" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+    id,provider_id,s_ip,s_port,s_read_timeout,s_desc,s_jvmId,last_check_time,destroy_time,heartbeat_id,create_at,status,update_at
+    </sql>
+
+    <sql id="order_by_sql">
+        <if test="orderColumn != null and orderSort != null">
+            ORDER BY ${orderColumn} ${orderSort}
+        </if>
+
+        <if test="orderColumn == null or orderSort == null">
+            ORDER BY id DESC
+        </if>
+    </sql>
+
+    <sql id="base_where_condition">
+        <where>
+                <if test="id != null and id != '' ">
+                    AND id = #{id}
+                </if>
+                <if test="providerId != null and providerId != '' ">
+                    AND provider_id = #{providerId}
+                </if>
+                <if test="sIp != null and sIp != '' ">
+                    AND s_ip = #{sIp}
+                </if>
+                <if test="sPort != null">
+                    AND s_port = #{sPort}
+                </if>
+                <if test="sReadTimeout != null and sReadTimeout != '' ">
+                    AND s_read_timeout = #{sReadTimeout}
+                </if>
+                <if test="sDesc != null and sDesc != '' ">
+                    AND s_desc = #{sDesc}
+                </if>
+                <if test="sJvmId != null">
+                    AND s_jvmId = #{sJvmId}
+                </if>
+                <if test="lastCheckTime != null">
+                    AND last_check_time = #{lastCheckTime}
+                </if>
+                <if test="destroyTime != null">
+                    AND destroy_time = #{destroyTime}
+                </if>
+                <if test="heartbeatId != null and heartbeatId != '' ">
+                    AND heartbeat_id = #{heartbeatId}
+                </if>
+                <if test="createAt != null">
+                    AND create_at = #{createAt}
+                </if>
+                <if test="status != null">
+                    AND status = #{status}
+                </if>
+                <if test="updateAt != null">
+                    AND update_at = #{updateAt}
+                </if>
+            <if test="ids != null">
+                <foreach collection="ids" index="index" item="id" open=" AND id IN (" separator="," close=")">
+                #{id,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="magicList != null">
+                <![CDATA[ AND  ${magicColumn}  in ]]>
+                <foreach collection="magicList" index="index" item="magicValue" open=" (" separator="," close=")">
+                #{magicValue}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+
+    <insert id="insert" keyProperty="id"
+            parameterType="com.exhibit.rpc.model.ProviderDetail">
+        <selectKey resultType="java.lang.String" order="BEFORE" keyProperty="id">
+            SELECT replace(uuid(),'-','') AS id
+        </selectKey>
+        INSERT INTO `provider_detail` (id, provider_id,s_ip,s_port,s_read_timeout,s_desc,s_jvmId,last_check_time,destroy_time,heartbeat_id,create_at,status,update_at)
+        VALUES (#{id,jdbcType=VARCHAR},
+                #{providerId},
+                #{sIp},
+                #{sPort},
+                #{sReadTimeout},
+                #{sDesc},
+                #{sJvmId},
+                #{lastCheckTime},
+                #{destroyTime},
+                #{heartbeatId},
+                #{createAt},
+                #{status},
+                #{updateAt}
+    )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO `provider_detail` (id, provider_id,s_ip,s_port,s_read_timeout,s_desc,s_jvmId,last_check_time,destroy_time,heartbeat_id,create_at,status,update_at)
+        VALUES
+        <if test="list != null">
+            <foreach collection="list" item="item" index="index" separator=",">
+                (
+                    replace(uuid(), '-', ''),
+                    #{item.providerId},
+                    #{item.sIp},
+                    #{item.sPort},
+                    #{item.sReadTimeout},
+                    #{item.sDesc},
+                    #{item.sJvmId},
+                    #{item.lastCheckTime},
+                    #{item.destroyTime},
+                    #{item.heartbeatId},
+                    #{item.createAt},
+                    #{item.status},
+                    #{item.updateAt}
+                )
+            </foreach>
+        </if>
+    </insert>
+
+    <insert id="insertSelective" keyProperty="id"
+            parameterType="com.exhibit.rpc.model.ProviderDetail">
+        <selectKey resultType="java.lang.String" order="BEFORE" keyProperty="id">
+            SELECT replace(uuid(),'-','') AS id
+        </selectKey>
+
+        INSERT INTO `provider_detail`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="providerId != null">
+            provider_id,
+            </if>
+            <if test="sIp != null">
+            s_ip,
+            </if>
+            <if test="sPort != null">
+            s_port,
+            </if>
+            <if test="sReadTimeout != null">
+            s_read_timeout,
+            </if>
+            <if test="sDesc != null">
+            s_desc,
+            </if>
+            <if test="sJvmId != null">
+            s_jvmId,
+            </if>
+            <if test="lastCheckTime != null">
+            last_check_time,
+            </if>
+            <if test="destroyTime != null">
+            destroy_time,
+            </if>
+            <if test="heartbeatId != null">
+            heartbeat_id,
+            </if>
+            <if test="createAt != null">
+            create_at,
+            </if>
+            <if test="status != null">
+            status,
+            </if>
+            <if test="updateAt != null">
+            update_at
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+        #{id,jdbcType=VARCHAR},
+            <if test="providerId != null">
+            #{providerId},
+            </if>
+            <if test="sIp != null">
+            #{sIp},
+            </if>
+            <if test="sPort != null">
+            #{sPort},
+            </if>
+            <if test="sReadTimeout != null">
+            #{sReadTimeout},
+            </if>
+            <if test="sDesc != null">
+            #{sDesc},
+            </if>
+            <if test="sJvmId != null">
+            #{sJvmId},
+            </if>
+            <if test="lastCheckTime != null">
+            #{lastCheckTime},
+            </if>
+            <if test="destroyTime != null">
+            #{destroyTime},
+            </if>
+            <if test="heartbeatId != null">
+            #{heartbeatId},
+            </if>
+            <if test="createAt != null">
+            #{createAt},
+            </if>
+            <if test="status != null">
+            #{status},
+            </if>
+            <if test="updateAt != null">
+            #{updateAt}
+            </if>
+        </trim>
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `provider_detail`
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectBatchByPrimaryKey" resultMap="BaseResultMap" parameterType="java.util.List">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `provider_detail`
+        <include refid="base_where_condition"/>
+    </select>
+
+    <update id="updateByPrimaryKeySelective"
+            parameterType="com.exhibit.rpc.model.ProviderDetail">
+        UPDATE `provider_detail`
+        <set>
+            <if test="providerId != null">
+            provider_id = #{providerId},
+            </if>
+            <if test="sIp != null">
+            s_ip = #{sIp},
+            </if>
+            <if test="sPort != null">
+            s_port = #{sPort},
+            </if>
+            <if test="sReadTimeout != null">
+            s_read_timeout = #{sReadTimeout},
+            </if>
+            <if test="sDesc != null">
+            s_desc = #{sDesc},
+            </if>
+            <if test="sJvmId != null">
+            s_jvmId = #{sJvmId},
+            </if>
+            <if test="lastCheckTime != null">
+            last_check_time = #{lastCheckTime},
+            </if>
+            <if test="destroyTime != null">
+            destroy_time = #{destroyTime},
+            </if>
+            <if test="heartbeatId != null">
+            heartbeat_id = #{heartbeatId},
+            </if>
+            <if test="createAt != null">
+            create_at = #{createAt},
+            </if>
+            <if test="status != null">
+            status = #{status},
+            </if>
+            <if test="updateAt != null">
+            update_at = #{updateAt}
+            </if>
+        </set>
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="com.exhibit.rpc.model.ProviderDetail">
+        UPDATE `provider_detail`
+        SET
+        provider_id = #{providerId},
+        s_ip = #{sIp},
+        s_port = #{sPort},
+        s_read_timeout = #{sReadTimeout},
+        s_desc = #{sDesc},
+        s_jvmId = #{sJvmId},
+        last_check_time = #{lastCheckTime},
+        destroy_time = #{destroyTime},
+        heartbeat_id = #{heartbeatId},
+        create_at = #{createAt},
+        status = #{status},
+        update_at = #{updateAt}
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectByParams" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `provider_detail`
+        <include refid="base_where_condition"/>
+        <include refid="order_by_sql"/>
+        <if test="offset != null and size != null">
+            LIMIT #{offset}, #{size}
+        </if>
+    </select>
+
+    <select id="countByParams" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+        SELECT
+        COUNT(DISTINCT id)
+        FROM `provider_detail`
+        <include refid="base_where_condition"/>
+    </select>
+
+    <select id="selectFirstByParams" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `provider_detail`
+        <include refid="base_where_condition"/>
+        <include refid="order_by_sql"/>
+        LIMIT 1
+    </select>
+    
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		DELETE FROM `provider_detail`
+		WHERE id = #{id,jdbcType=VARCHAR}
+	</delete>
+</mapper>
